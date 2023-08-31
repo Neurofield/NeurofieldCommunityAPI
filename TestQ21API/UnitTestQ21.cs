@@ -19,7 +19,7 @@ public class UnitTestQ21
         switch (deviceType)
         {
             case NeurofieldCommunityDeviceType.EEG21RevK:
-                // New FPGALess device scale set to 4.5 volts divided by 2^24 and ADC gain=12 (i.e. without any external instrumentation amplifier analog gain)
+                // Q21 Rev-K device scale set to 4.5 volts divided by 2^24 and ADC gain=12 (i.e. without any external instrumentation amplifier analog gain)
                 // 4500000 / 8388608 / 12 =  0.044703483581543
                 // also multiply by -1 to change the polarity
                 scaleFactor = -0.044703483581543;
