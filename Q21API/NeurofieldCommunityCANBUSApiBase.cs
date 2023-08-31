@@ -9,7 +9,7 @@ public class NeurofieldCommunityCANBUSApiBase
 {
     #region Private
 
-    private PcanChannel _channel;
+    private PcanChannel _canChannel;
     
     /// <summary>
     /// allow up to 8 usb PCAN interfaces!
@@ -46,7 +46,7 @@ public class NeurofieldCommunityCANBUSApiBase
     private void _configureTraceFile()
     {
         //  Configure the maximum size of a trace file to 5 megabytes
-        var stsResult = Api.SetValue(_channel, PcanParameter.TraceSize, 5);
+        var stsResult = Api.SetValue(_canChannel, PcanParameter.TraceSize, 5);
         
         if (stsResult != PcanStatus.OK)
             throw new Exception(_getFormattedError(stsResult));
@@ -55,7 +55,7 @@ public class NeurofieldCommunityCANBUSApiBase
         // * Standard name is used
         // * Existing file is overwritten, 
         // * Only one file is created.
-        stsResult = Api.SetValue(_channel, PcanParameter.TraceConfigure, ParameterValue.Trace.SingleFile | ParameterValue.Trace.OverrideExisting);
+        stsResult = Api.SetValue(_canChannel, PcanParameter.TraceConfigure, ParameterValue.Trace.SingleFile | ParameterValue.Trace.OverrideExisting);
         
         if (stsResult != PcanStatus.OK)
             throw new Exception(_getFormattedError(stsResult));
@@ -134,7 +134,7 @@ public class NeurofieldCommunityCANBUSApiBase
 
         while (true)
         {
-            var stsResult = Api.Read(_channel, out msgRx, out var timestamp1);
+            var stsResult = Api.Read(_canChannel, out msgRx, out var timestamp1);
             
             if (stsResult == PcanStatus.InvalidOperation)
                 throw new Exception(_getFormattedError(stsResult));
@@ -176,7 +176,7 @@ public class NeurofieldCommunityCANBUSApiBase
 
         var msg = new PcanMessage(id, MessageType.Extended,8,data);
 
-        var stsResult = Api.Write(_channel, msg);
+        var stsResult = Api.Write(_canChannel, msg);
 
         if (stsResult != PcanStatus.OK)
         {
@@ -186,7 +186,7 @@ public class NeurofieldCommunityCANBUSApiBase
 
                 while (tryCount < 30)
                 {
-                    stsResult = Api.Uninitialize(_channel);
+                    stsResult = Api.Uninitialize(_canChannel);
                     
                     if (stsResult != PcanStatus.OK)
                     {
@@ -196,7 +196,7 @@ public class NeurofieldCommunityCANBUSApiBase
                     
                     Thread.Sleep(10);
                     
-                    stsResult = Api.Initialize(_channel,Bitrate.Pcan500);
+                    stsResult = Api.Initialize(_canChannel,Bitrate.Pcan500);
                     
                     if (stsResult != PcanStatus.OK)
                     {
@@ -208,7 +208,7 @@ public class NeurofieldCommunityCANBUSApiBase
                     
                     _configureTraceFile(); // Prepares the PCAN-Basic's PCAN-Trace file
                     
-                    stsResult = Api.Write(_channel,msg);
+                    stsResult = Api.Write(_canChannel,msg);
                     
                     if (stsResult != PcanStatus.OK)
                     {
@@ -266,19 +266,19 @@ public class NeurofieldCommunityCANBUSApiBase
     protected void ResetBuffers()
     {
         // reset tx/rx buffers
-        Api.Reset(_channel);
+        Api.Reset(_canChannel);
     }
 
     /// <summary>
     /// This constructor also verifies device connected on this interface.
     /// It takes about 1 second to complete
     /// </summary>
-    /// <param name="channel"></param>
+    /// <param name="canChannel"></param>
     /// <exception cref="Exception"></exception>
-    public NeurofieldCommunityCANBUSApiBase(PcanChannel channel)
+    public NeurofieldCommunityCANBUSApiBase(PcanChannel canChannel)
     {
         // Check for a Plug&Play Handle
-        var status = Api.GetValue(channel, PcanParameter.ChannelCondition, out uint buffer);
+        var status = Api.GetValue(canChannel, PcanParameter.ChannelCondition, out uint buffer);
         
         if (status != PcanStatus.OK)
             throw new Exception("This pcan interface is not available"); 
@@ -289,15 +289,15 @@ public class NeurofieldCommunityCANBUSApiBase
         {
             // this interface exist but not available,             
             // we were looking for this and it is not available! Too bad...
-            throw new Exception($"The Channel {channel} is NOT available.");
+            throw new Exception($"The Channel {canChannel} is NOT available.");
         }
         
         // found the interface          
-        _channel = channel;
+        _canChannel = canChannel;
 
         try
         {
-            status = Api.Initialize(_channel, Bitrate.Pcan500);
+            status = Api.Initialize(_canChannel, Bitrate.Pcan500);
 
             if (status != PcanStatus.OK)
                 throw new Exception(_getFormattedError(status));
@@ -315,7 +315,7 @@ public class NeurofieldCommunityCANBUSApiBase
             // read data until queue empty
             while (true)
             {
-                status = Api.Read(_channel, out var msgRx);
+                status = Api.Read(_canChannel, out var msgRx);
                     
                 if (status == PcanStatus.InvalidOperation || status == PcanStatus.ReceiveQueueEmpty)
                     break;
@@ -369,12 +369,12 @@ public class NeurofieldCommunityCANBUSApiBase
 
     public void Release()
     {
-        if (_channel == PcanChannel.None)
+        if (_canChannel == PcanChannel.None)
             return;
 
-        Api.Reset(_channel);
-        Api.Uninitialize(_channel);
-        _channel = PcanChannel.None;
+        Api.Reset(_canChannel);
+        Api.Uninitialize(_canChannel);
+        _canChannel = PcanChannel.None;
     }
     
     

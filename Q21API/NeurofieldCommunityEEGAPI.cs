@@ -1,4 +1,5 @@
-﻿using Peak.Can.Basic;
+﻿using System.Diagnostics;
+using Peak.Can.Basic;
 
 namespace Q21API;
 
@@ -80,6 +81,7 @@ public abstract class NeurofieldCommunityEEGAPI : NeurofieldCommunityCANBUSApiBa
 
     #endregion
 
+    /// <inheritdoc />
     protected NeurofieldCommunityEEGAPI(PcanChannel pcanHandle) : base(pcanHandle)
     {
             
@@ -120,7 +122,9 @@ public abstract class NeurofieldCommunityEEGAPI : NeurofieldCommunityCANBUSApiBa
         data[3] = (byte) nSamples;
             
         SendMessage(SelectedEEGDevice, 0x03, data);
+        
     }
+
 
     /// <summary>
     /// blinks the front led of the device three times by requesting 3x100 samples and waiting in between.

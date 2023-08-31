@@ -24,8 +24,6 @@ public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
     
     public List<NeurofieldCommunityDevice> ConnectedEEGDevices { get; private set; }
     
-    
-    
     public NeurofieldCommunityQ21API(PcanChannel pcanHandle) : base(pcanHandle)
     {
         ConnectedEEGDevices = new List<NeurofieldCommunityDevice>();
@@ -113,6 +111,13 @@ public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
 
         return impedance;
     }
+    
+    /// <summary>
+    /// receives single time EEG sample.
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns>array of 20 channel values. Data is unscaled Channel order is:
+    /// F7 = 0, T3 = 1, T4 = 2, T5 = 3, T6 = 4, Cz = 5, Fz = 6, Pz = 7, F3 = 8, C4 = 9, C3 = 10, P4 = 11, P3 = 12, O2 = 13, O1 = 14, F8 = 15, F4 = 16, Fp1 = 17, Fp2 = 18, HR = 19</returns>
     public override int[] ReceiveSingleEEGDataSample(out ulong time)
     {
         var stage = 0;
@@ -151,8 +156,9 @@ public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
         return "Type: " + SelectedEEGDevice.Type + ", Serial: " + SelectedEEGDevice.Serial;
     }
     
-    public byte GetEEGDeviceSerial() => SelectedEEGDevice.Serial;
+    public byte EEGDeviceSerial => SelectedEEGDevice.Serial;
     
+    public NeurofieldCommunityDeviceType EEGDeviceType => SelectedEEGDevice.Type;
     
     
     #endregion
