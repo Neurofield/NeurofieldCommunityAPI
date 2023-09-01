@@ -45,10 +45,14 @@ This repository specifically contains the API for the [20 channel Q21 EEG Acquis
         // nSamples x nChannels data array in micro volts
         var eegData = new double[nSamples, 20];
 
-        // in a real application, you should call ReceiveSingleEEGDataSample in a timer or in a separate task/worker/process
         for (var iSample = 0; iSample < nSamples; iSample++)
         {
+            // Note: in a real application, you should call GetSingleSample
+            // in a timer callback or in a separate task, background worker or a process
+            // here, we are calling it in a for loop for demo
+            
             // Receive single time data.
+            // GetSingleSample function takes about ~4 milli-seconds to return since we are sampling at a 256 Hz rate.  
             var rawData = api.GetSingleSample(out var time);
 
             // Write to 4 second buffer
