@@ -5,6 +5,9 @@ namespace Q21API;
 
 public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
 {
+
+    private double _scaleFactor;
+    
     public override string ToString()
     {
         return "Dev:" + SelectedEEGDevice.Serial;
@@ -50,6 +53,30 @@ public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
         
         // Select the first device on this interface
         SelectedEEGDevice = ConnectedEEGDevices[0];
+
+        switch (SelectedEEGDevice.Type)
+        {
+            case NeurofieldCommunityDeviceType.EEG21RevK:
+                // Q21 Rev-K device scale set to 4.5 volts divided by 2^24 and ADC gain=12 (i.e. without any external instrumentation amplifier analog gain)
+                // 4500000 / 8388608 / 12 =  0.044703483581543
+                // also multiply by -1 to change the polarity
+                _scaleFactor = -0.044703483581543;
+                break;
+                
+            case NeurofieldCommunityDeviceType.EEG21RevA:
+                // Divide by ADC gain (2) and Neurofield external instrumentation amplifier analog gain (6.6667 for EEG21Rev A).                        
+                // 4500000 / 8388608 / 6.6667 / 2 = 0.040233115106831. Refer to the API doc.            
+                // also multiply by -1 to change the polarity
+                _scaleFactor = -0.040233115106831;
+                break;
+            
+            default: // Other versions
+                // Divide by ADC gain (2) and Neurofield external instrumentation amplifier analog gain (12.85 for others).                        
+                // 4500000 / 8388608 / 12.85 / 2 = 0.020873221905779. Refer to the API doc.            
+                // also multiply by -1 to change the polarity
+                _scaleFactor = -0.020873221905779;
+                break;
+        }
         
     }
     
@@ -111,9 +138,31 @@ public class NeurofieldCommunityQ21API : NeurofieldCommunityEEGAPI
 
         return impedance;
     }
+
+    /// <summary>
+    /// Receive single time EEG sample in micro volt units.
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    public double[] GetSingleSample(out ulong time)
+    {
+        var rawData = ReceiveSingleEEGDataSample(out var time1);
+
+        var eegData = new double[rawData.Length];
+        
+        for (var iChannel = 0; iChannel < rawData.Length; iChannel++)
+            eegData[iChannel] = rawData[iChannel] * _scaleFactor;
+
+        time = time1;
+        return eegData;
+    }
     
     /// <summary>
-    /// receives single time EEG sample.
+    /// Receive single time EEG sample. unscaled 24 bit integer samples
+    /// If the receive buffer has one or more samples gets the oldest sample in the receive buffer and returns immediately.
+    /// Otherwise, waits !1.5 seconds to get a sample
+    /// Timeouts and throws an exception after ~1.5 seconds if no data received.
+    /// You must call this function at least samplingRate times per second to get a continuous reading.
     /// </summary>
     /// <param name="time"></param>
     /// <returns>array of 20 channel values. Data is unscaled Channel order is:
