@@ -2,7 +2,7 @@
 
 Neurofield Community API is the public version of the NeurofieldAPI which is used to control the Neurofield products. Detailed information about the products can be found on the [Neurofield Web Site](https://neurofield.org/).
 
-This repository specifically contains the API for the [20 channel Q21 EEG Acquisition device](https://neurofield.org/neurofield-products#q21). Q21 is an US FDA (Food abnd Drug Administration) approved, high resolution, DC coupled 20 channel simultaneus sampling amplifier with very low input noise and high Common Mode Rejection Ratio. 
+This repository specifically contains the API for the [20 channel Q21 EEG Acquisition device](https://neurofield.org/neurofield-products#q21). Q21 is a USA FDA (Food and Drug Administration) approved, high resolution, DC coupled 20 channel simultaneus sampling amplifier with very low input noise and high Common Mode Rejection Ratio. 
 
 <p float="middle">
   <img src="https://3989ac5bcbe1edfc864a-0a7f10f87519dba22d2dbc6233a731e5.ssl.cf2.rackcdn.com/neurofield/img-Q21_copy.jpg?raw=true" width="400"/>     
